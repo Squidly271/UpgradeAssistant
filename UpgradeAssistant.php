@@ -43,7 +43,6 @@ echo "\nChecking for plugin compatibility\n";
 	
 exec("plugin checkos");
 $newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
-$newUnRaidVersion = "7.2.3";
 $moderation = download_json("https://raw.githubusercontent.com/Squidly271/Community-Applications-Moderators/master/Moderation.json","/tmp/upgradeAssistantModeration.json");
 
 foreach ($installedPlugs as $installedPlg) {
