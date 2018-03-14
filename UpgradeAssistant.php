@@ -95,7 +95,7 @@ $output = exec("lscpu | grep Ryzen");
 if ( $output ) {
 	$output = exec("cat /boot/config/go | grep  /usr/local/sbin/zenstates");
 	if ( ! $output ) {
-		echo "Warning: zenstates is not loading withing /boot/config/go  See here: https://lime-technology.com/forums/topic/66327-unraid-os-version-641-stable-release-update-notes/\n";
+		echo "Error: zenstates is not loading withing /boot/config/go  See here: https://lime-technology.com/forums/topic/66327-unraid-os-version-641-stable-release-update-notes/\n";
 	}
 } else {
 	echo "OK: Ryzen CPU not detected\n";
@@ -121,6 +121,16 @@ if ( is_file("/boot/config/plugins/dynamix.plg") ) {
 	echo "OK: dynamix.plg not found\n";
 }
 
+# Check for less than 2G memory_get_peak_usage
+echo "\nChecking installed RAM\n";
+$file = trim(str_replace("MemTotal:","",exec("cat /proc/meminfo | grep MemTotal:")));
+$raw = explode(" ",$file);
+	
+if ($raw[0] < 3500000 ) {
+	echo "Error: The functional minimum of memory for unRaid is 4G as a very basic NAS.  You will need to increase your memory\n";
+} else {
+	echo "OK:  You have 4+ Gig of memory\n";
+}
 
 #Support stuff
 function download_url($url, $path = "", $bg = false,$requestNoCache=false){
