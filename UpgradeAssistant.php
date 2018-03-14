@@ -3,7 +3,15 @@
 
 echo "Disclaimer:  This script is NOT definitive.  There may be other issues with your server that will affect compatibility.\n\n";
 
+exec("plugin checkos");
+$newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
+$currentUnRaidVersion = parse_ini_file("/etc/unraid-version");
 
+echo "Current unRaid Version: {$currentUnRaidVersion['version']}   Upgrade unRaid Version: $newUnRaidVersion\n\n";
+
+if ( version_compare($newUnRaidVersion,$currentUnRaidVersion['version'],"=") ) {
+	echo "NOTE: You are currently running the latest version of unRaid.  To check compatibility against the 'next' branch of unRaid, go to Upgrade OS and select 'Next' branch and then re-run these tests\n\n";
+}
 
 # MAIN
 
@@ -20,6 +28,8 @@ if ( $disks['cache']['status'] == "DISK_OK" ) {
 	} else {
 		echo "OK: Cache drive partition starts on sector 64\n";
 	}
+} else {
+	echo "OK: Cache drive not present\n";
 }
 #check for plugins up to date
 echo "\nChecking for plugin updates\n";
@@ -41,8 +51,7 @@ if ( ! $updateFlag ) {
 
 echo "\nChecking for plugin compatibility\n";
 	
-exec("plugin checkos");
-$newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
+
 $moderation = download_json("https://raw.githubusercontent.com/Squidly271/Community-Applications-Moderators/master/Moderation.json","/tmp/upgradeAssistantModeration.json");
 
 foreach ($installedPlugs as $installedPlg) {
