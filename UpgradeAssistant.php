@@ -3,9 +3,14 @@
 
 echo "Disclaimer:  This script is NOT definitive.  There may be other issues with your server that will affect compatibility.\n\n";
 
-exec("plugin checkos");
-$newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
 $currentUnRaidVersion = parse_ini_file("/etc/unraid-version");
+if ( version_compare($currentUnRaidVersion,"6.3.5","<=") ) {
+	exec("plugin check /var/log/unRAIDServer.plg");
+} else {
+	exec("plugin checkos");
+}
+$newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
+
 
 echo "Current unRaid Version: {$currentUnRaidVersion['version']}   Upgrade unRaid Version: $newUnRaidVersion\n\n";
 
