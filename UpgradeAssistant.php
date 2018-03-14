@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?PHP
-
 echo "Disclaimer:  This script is NOT definitive.  There may be other issues with your server that will affect compatibility.\n\n";
 
 $currentUnRaidVersion = parse_ini_file("/etc/unraid-version");
@@ -10,7 +9,6 @@ if ( version_compare($currentUnRaidVersion,"6.3.5","<=") ) {
 	exec("plugin checkos");
 }
 $newUnRaidVersion = exec("plugin version /tmp/plugins/unRAIDServer.plg");
-
 
 echo "Current unRaid Version: {$currentUnRaidVersion['version']}   Upgrade unRaid Version: $newUnRaidVersion\n\n";
 
@@ -44,7 +42,8 @@ foreach ($installedPlugs as $installedPlg) {
 	$updateVer = exec("plugin version ".escapeshellarg($installedPlg));
 	$installedVer = exec("plugin version ".escapeshellarg("/boot/config/plugins/".basename($installedPlg)));
 	if (version_compare($updateVer,$installedVer,">")) {
-		echo "Warning: ".basename($installedPlg)." is not up to date\n";
+		$pluginName = exec("plugin name ".escapeshellarg($installedPlg));
+		echo "Warning: ".basename($installedPlg)." ($pluginName) is not up to date.  It is recommended to update all your plugins.\n";
 		$updateFlag = true;
 	}
 }
@@ -53,9 +52,7 @@ if ( ! $updateFlag ) {
 }
  
 # Check for plugins compatible
-
 echo "\nChecking for plugin compatibility\n";
-	
 
 $moderation = download_json("https://raw.githubusercontent.com/Squidly271/Community-Applications-Moderators/master/Moderation.json","/tmp/upgradeAssistantModeration.json");
 
@@ -63,17 +60,18 @@ foreach ($installedPlugs as $installedPlg) {
 	$pluginURL = exec("plugin pluginURL ".escapeshellarg($installedPlg));
 	if ( $moderation[$pluginURL]['MaxVer'] ) {
 		if ( version_compare($newUnRaidVersion,$moderation[$pluginURL]['MaxVer'],">") ) {
-			echo "Error: ".basename($installedPlg)." is not compatible with $newUnRaidVersion.  It is HIGHLY recommended to uninstall this plugin\n";
+			$pluginName = exec("plugin name ".escapeshellarg($installedPlg));
+			echo "Error: ".basename($installedPlg)." ($pluginName) is not compatible with $newUnRaidVersion.  It is HIGHLY recommended to uninstall this plugin\n";
 			$versionsFlag = true;
 		}
 	}
 	if ( $moderation[$pluginURL]['DeprecatedMaxVer'] ) {
 		if ( version_compare($newUnRaidVersion,$moderation[$pluginURL]['DeprecatedMaxVer'],">") ) {
-			echo "Error: ".basename($installedPlg)." is deprecated with $newUnRaidVersion.  It is recommended to uninstall this plugin\n";
+			$pluginName = exec("plugin name ".escapeshellarg($installedPlg));
+			echo "Error: ".basename($installedPlg)." ($pluginName) is deprecated with $newUnRaidVersion.  It is recommended to uninstall this plugin\n";
 			$versionsFlag = true;
 		}
 	}
-	
 }
 if ( ! $versionsFlag ) {
 	echo "OK: All plugins are compatible\n";
@@ -115,9 +113,16 @@ if ( ! $diskDSBLflag ) {
 	echo "OK: No disks are disabled\n";
 }
 
+# Check for old versions of dynamix.plg still present\n
+echo "\nChecking for very old versions of dynamix.plg\n";
+if ( is_file("/boot/config/plugins/dynamix.plg") ) {
+	echo "Error: dynamix.plg exists at /config/plugins on the flash drive.  Very old versions of this file can cause issues.  It is recommended to delete this file\n";
+} else {
+	echo "OK: dynamix.plg not found\n";
+}
+
 
 #Support stuff
-
 function download_url($url, $path = "", $bg = false,$requestNoCache=false){
 	if ( ! strpos($url,"?") ) {
 		$url .= "?".time(); # append time to always wind up requesting a non cached version
