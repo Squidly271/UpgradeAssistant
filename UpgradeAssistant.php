@@ -63,7 +63,7 @@ foreach ($installedPlugs as $installedPlg) {
 		}
 	}
 	if ( $moderation[$pluginURL]['DeprecatedMaxVer'] ) {
-		if ( version_compare($newUnRaidVersion,$moderation[$pluginURL]['MaxVer'],">") ) {
+		if ( version_compare($newUnRaidVersion,$moderation[$pluginURL]['DeprecatedMaxVer'],">") ) {
 			echo "Error: ".basename($installedPlg)." is deprecated with $newUnRaidVersion.  It is recommended to uninstall this plugin\n";
 			$versionsFlag = true;
 		}
